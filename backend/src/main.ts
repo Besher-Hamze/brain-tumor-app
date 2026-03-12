@@ -23,10 +23,9 @@ async function bootstrap() {
     }),
   );
 
-  // ── STATIC FILES (uploaded scans & overlays) ──────
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads',
-  });
+  // ── STATIC FILES ──
+// Images are stored and served by the AI (Flask) module
+// NestJS only saves the URL path returned from Flask
 
   // ── GLOBAL PREFIX ─────────────────────────────────
   app.setGlobalPrefix('api');

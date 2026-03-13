@@ -1,3 +1,4 @@
+// src/modules/patients/patients.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -16,25 +17,30 @@ export class PatientsService {
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>,
   ) {}
 
-  // ── CREATE ─────────────────────────────────────────
-  async create(
-    dto: CreatePatientDto,
-    doctorId: string,
-  ): Promise<PatientDocument> {
-    return this.patientModel.create({ ...dto, doctor: doctorId });
+  // Doctor/Admin creates patient, doctor = current user
+  async create(dto: CreatePatientDto, currentUserId: string): Promise<PatientDocument> {
+    return this.patientModel.create({
+      ...dto,
+      doctor: currentUserId,
+    });
   }
 
-  // ── FIND ALL ───────────────────────────────────────
-  async findAll(userId: string, role: string): Promise<PatientDocument[]> {
-    const filter = role === UserRole.ADMIN ? {} : { doctor: userId };
+  // Admin → all, Doctor → own
+  async findAll(currentUserId: string, currentUserRole: string): Promise<PatientDocument[]> {
+    const filter =
+      currentUserRole === UserRole.ADMIN ? {} : { doctor: currentUserId };
+
     return this.patientModel
       .find(filter)
       .populate('doctor', 'full_name email specialty')
       .exec();
   }
 
-  // ── FIND ONE ───────────────────────────────────────
-  async findOne(id: string, userId: string, role: string): Promise<PatientDocument> {
+  async findOne(
+    id: string,
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<PatientDocument> {
     const patient = await this.patientModel
       .findById(id)
       .populate('doctor', 'full_name email specialty')
@@ -42,16 +48,23 @@ export class PatientsService {
 
     if (!patient) throw new NotFoundException(`Patient "${id}" not found`);
 
-    if (role !== UserRole.ADMIN && patient.doctor.toString() !== userId) {
+    if (
+      currentUserRole !== UserRole.ADMIN &&
+      patient.doctor.toString() !== currentUserId
+    ) {
       throw new ForbiddenException('Access denied to this patient');
     }
 
     return patient;
   }
 
-  // ── UPDATE ─────────────────────────────────────────
-  async update(id: string, dto: UpdatePatientDto, userId: string, role: string): Promise<PatientDocument> {
-    await this.findOne(id, userId, role); // ownership check
+  async update(
+    id: string,
+    dto: UpdatePatientDto,
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<PatientDocument> {
+    await this.findOne(id, currentUserId, currentUserRole);
 
     const updated = await this.patientModel
       .findByIdAndUpdate(id, dto, { new: true })
@@ -62,7 +75,7 @@ export class PatientsService {
     return updated;
   }
 
-  // ── DEACTIVATE (Admin only) ────────────────────────
+  // Admin only – no need for currentUserId, we already guard in controller
   async deactivate(id: string): Promise<PatientDocument> {
     const patient = await this.patientModel
       .findByIdAndUpdate(id, { is_active: false }, { new: true })
@@ -71,7 +84,6 @@ export class PatientsService {
     return patient;
   }
 
-  // ── ACTIVATE (Admin only) ──────────────────────────
   async activate(id: string): Promise<PatientDocument> {
     const patient = await this.patientModel
       .findByIdAndUpdate(id, { is_active: true }, { new: true })
@@ -80,7 +92,6 @@ export class PatientsService {
     return patient;
   }
 
-  // ── COUNT BY DOCTOR ────────────────────────────────
   async countByDoctor(): Promise<any[]> {
     return this.patientModel.aggregate([
       { $group: { _id: '$doctor', count: { $sum: 1 } } },

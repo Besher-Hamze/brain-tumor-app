@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './schema/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -12,14 +16,12 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  // Create new user (admin creates doctors)
+  // ── CREATE ─────────────────────────────────────────
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     const existingUser = await this.userModel.findOne({
       email: createUserDto.email,
     });
-    if (existingUser) {
-      throw new ConflictException('Email already exists');
-    }
+    if (existingUser) throw new ConflictException('Email already exists');
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
@@ -31,12 +33,12 @@ export class UsersService {
     return user;
   }
 
-  // Get all users
+  // ── FIND ALL ───────────────────────────────────────
   async findAll(): Promise<UserDocument[]> {
     return this.userModel.find().select('-password').exec();
   }
 
-  // Get all active doctors
+  // ── FIND ALL DOCTORS ───────────────────────────────
   async findAllDoctors(): Promise<UserDocument[]> {
     return this.userModel
       .find({ role: 'doctor', is_active: true })
@@ -44,10 +46,13 @@ export class UsersService {
       .exec();
   }
 
-  // Get one by ID
+  // ── FIND ONE BY ID ─────────────────────────────────
   async findOne(id: string): Promise<UserDocument> {
     try {
-      const user = await this.userModel.findById(id).select('-password').exec();
+      const user = await this.userModel
+        .findById(id)
+        .select('-password')
+        .exec();
       if (!user) throw new NotFoundException(`User with ID "${id}" not found`);
       return user;
     } catch (error) {
@@ -58,13 +63,13 @@ export class UsersService {
     }
   }
 
-  // Get by email (used by auth)
+  // ── FIND BY EMAIL ──────────────────────────────────
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
 
-  // Update user
- async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument> {
+  // ── UPDATE ─────────────────────────────────────────
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument> {
     const existingUser = await this.userModel.findById(id).exec();
     if (!existingUser) {
       throw new NotFoundException(`User with ID "${id}" not found`);
@@ -78,37 +83,41 @@ export class UsersService {
       if (duplicate) throw new ConflictException('Email already exists');
     }
 
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
-
     const updated = await this.userModel
       .findByIdAndUpdate(id, { ...updateUserDto }, { new: true })
       .select('-password')
       .exec();
 
-    if (!updated) throw new NotFoundException(`User with ID "${id}" not found`);  // ← add this
+    if (!updated) throw new NotFoundException(`User with ID "${id}" not found`);
     return updated;
   }
 
-  // Deactivate user (soft delete)
-async deactivate(id: string): Promise<UserDocument> {
+  // ── DEACTIVATE ─────────────────────────────────────
+  async deactivate(id: string): Promise<UserDocument> {
     const user = await this.userModel
       .findByIdAndUpdate(id, { is_active: false }, { new: true })
       .select('-password')
       .exec();
-
-    if (!user) throw new NotFoundException(`User with ID "${id}" not found`);  // ← add this
+    if (!user) throw new NotFoundException(`User with ID "${id}" not found`);
     return user;
   }
 
+  // ── ACTIVATE ───────────────────────────────────────
+  async activate(id: string): Promise<UserDocument> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { is_active: true }, { new: true })
+      .select('-password')
+      .exec();
+    if (!user) throw new NotFoundException(`User with ID "${id}" not found`);
+    return user;
+  }
 
-  // Update last login timestamp
+  // ── UPDATE LAST LOGIN ──────────────────────────────
   async updateLastLogin(id: string): Promise<void> {
     await this.userModel.findByIdAndUpdate(id, { last_login: new Date() });
   }
 
-  // Compare passwords (used by auth)
+  // ── COMPARE PASSWORD ───────────────────────────────
   async comparePassword(
     password: string,
     hashedPassword: string,

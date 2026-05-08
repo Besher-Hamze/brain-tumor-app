@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PatientsModule } from './modules/patients/patients.module';
+import { ScansModule } from './modules/scans/scans.module';
 
 @Module({
   imports: [
@@ -19,6 +21,12 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    PatientsModule,
+    ScansModule,
+  //   ServeStaticModule.forRoot({
+  //   rootPath: join(__dirname, '..', 'uploads'),
+  //   serveRoot: '/uploads/',
+  // }),
   ],
 })
 export class AppModule {}

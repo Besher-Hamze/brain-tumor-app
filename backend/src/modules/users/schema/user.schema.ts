@@ -1,52 +1,44 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { UserRole } from '../../../common/enums/role.enum';
 
-export interface User {
-  _id: Types.ObjectId;
-  email: string;
-  password: string;
-  full_name: string;
-  role: UserRole;
-}
-
-export type UserDocument = User & Document;
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
-export class User extends Document {
-  @Prop({ required: true })
-  full_name: string;
+export class User {
+  @Prop({ required: true, trim: true })
+  full_name!: string;
 
-  @Prop({ required: true, unique: true })
-  email: string;
+  @Prop({ required: true, unique: true, trim: true, lowercase: true })
+  email!: string;
 
   @Prop({ required: true })
-  password: string;
+  password!: string;
 
   @Prop({
     required: true,
     enum: UserRole,
     default: UserRole.DOCTOR,
   })
-  role: UserRole;
+  role!: UserRole;
 
-  @Prop()
-  specialty: string;
+  @Prop({ trim: true })
+  specialty?: string;
 
-  @Prop()
-  hospital: string;
+  @Prop({ trim: true })
+  hospital?: string;
 
-  @Prop()
-  phone: string;
+  @Prop({ trim: true })
+  phone?: string;
 
   @Prop({ default: true })
-  is_active: boolean;
+  is_active!: boolean;
+
+  @Prop({ trim: true })
+  profile_image?: string;
 
   @Prop()
-  profile_image: string;
-
-  @Prop()
-  last_login: Date;
+  last_login?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

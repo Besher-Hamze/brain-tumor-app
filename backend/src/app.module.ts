@@ -8,6 +8,7 @@ import { ScansModule } from './modules/scans/scans.module';
 import { AnalysisModule } from './modules/analysis/analysis.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     AnalysisModule,
     NotificationsModule,
     ReportsModule,
+    AppointmentsModule,
     /*ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'uploads'),
     serveRoot: '/uploads/',

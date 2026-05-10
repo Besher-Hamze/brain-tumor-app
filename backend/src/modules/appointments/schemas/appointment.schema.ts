@@ -16,6 +16,7 @@ export class Appointment {
   date_time!: Date;
 
   @Prop({
+    type: String,
     required: true,
     enum: AppointmentStatus,
     default: AppointmentStatus.SCHEDULED,

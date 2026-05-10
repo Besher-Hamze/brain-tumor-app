@@ -31,10 +31,6 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
     NotificationsModule,
     ReportsModule,
     AppointmentsModule,
-    /*ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'uploads'),
-    serveRoot: '/uploads/',
-  }),*/
   ],
 })
 export class AppModule {}

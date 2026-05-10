@@ -20,7 +20,7 @@ export class Patient {
   @Prop({ required: true })
   date_of_birth!: Date;
 
-  @Prop({ required: true, enum: Gender })
+  @Prop({ type: String, required: true, enum: Gender })
   gender!: Gender;
 
   @Prop({ required: true })
@@ -29,7 +29,7 @@ export class Patient {
   @Prop({ trim: true, lowercase: true })
   email?: string;
 
-  @Prop({ enum: BloodType })
+  @Prop({ type: String, enum: BloodType })
   blood_type?: BloodType;
 
   @Prop({ trim: true })

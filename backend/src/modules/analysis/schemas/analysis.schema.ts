@@ -10,6 +10,7 @@ export class Analysis {
   scan!: Types.ObjectId;
 
   @Prop({
+    type: String,
     required: true,
     enum: AnalysisStatus,
     default: AnalysisStatus.PENDING,

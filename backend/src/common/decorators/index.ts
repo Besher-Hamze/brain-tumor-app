@@ -5,23 +5,34 @@ import {
 } from '@nestjs/common';
 import { UserRole } from '../enums/role.enum';
 
-// ── GET CURRENT USER ID ────────────────────────────
+type RequestUser = {
+  _id: { toString(): string } | string;
+  role: UserRole;
+  email?: string;
+};
+
+const getRequestUser = (ctx: ExecutionContext): RequestUser => {
+  const request = ctx.switchToHttp().getRequest<{ user: RequestUser }>();
+  return request.user;
+};
+
 export const GetUserId = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    const user = request.user;
-    return user._id.toString();
+  (_data: unknown, ctx: ExecutionContext) => {
+    return getRequestUser(ctx)._id.toString();
   },
 );
 
-// ── GET CURRENT USER ───────────────────────────────
+export const GetUserRole = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext) => {
+    return getRequestUser(ctx).role;
+  },
+);
+
 export const CurrentUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    return request.user;
+  (_data: unknown, ctx: ExecutionContext) => {
+    return getRequestUser(ctx);
   },
 );
 
-// ── ROLES ──────────────────────────────────────────
 export const ROLES_KEY = 'roles';
 export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);

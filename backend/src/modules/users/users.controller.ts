@@ -60,17 +60,17 @@ export class UsersController {
     return { success: true, user };
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    this.logger.log(`PATCH /users/${id}`);
-    const user = await this.adminService.updateUser(id, updateUserDto);
-    return { success: true, user };
-  }
-
   @Patch(':id/activate')
   async activate(@Param('id') id: string) {
     this.logger.log(`PATCH /users/${id}/activate`);
     const user = await this.adminService.activateUser(id);
+    return { success: true, user };
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    this.logger.log(`PATCH /users/${id}`);
+    const user = await this.adminService.updateUser(id, updateUserDto);
     return { success: true, user };
   }
 

@@ -10,6 +10,7 @@ export class Notification {
   user!: Types.ObjectId;
 
   @Prop({
+    type: String,
     required: true,
     enum: NotificationType,
     default: NotificationType.GENERAL,

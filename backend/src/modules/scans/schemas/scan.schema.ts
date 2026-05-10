@@ -12,7 +12,7 @@ export class Scan {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   uploaded_by!: Types.ObjectId;
 
-  @Prop({ required: true, enum: ScanType })
+  @Prop({ type: String, required: true, enum: ScanType })
   type!: ScanType;
 
   @Prop({ required: true })

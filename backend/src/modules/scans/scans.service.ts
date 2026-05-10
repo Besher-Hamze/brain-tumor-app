@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserRole } from 'src/common/enums/role.enum';
@@ -16,6 +17,7 @@ export class ScansService {
   constructor(
     @InjectModel(Scan.name) private scanModel: Model<ScanDocument>,
     private readonly patientsService: PatientsService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(
@@ -39,7 +41,7 @@ export class ScansService {
     );
 
     const relativePath = `scans/${file.filename}`;
-    const fileUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${relativePath}`;
+    const fileUrl = `${this.getPublicBaseUrl()}/uploads/${relativePath}`;
 
     return this.scanModel.create({
       patient: patient._id,
@@ -215,5 +217,13 @@ export class ScansService {
     }
 
     throw new ForbiddenException('Access denied to this scan');
+  }
+
+  private getPublicBaseUrl(): string {
+    const configuredBaseUrl = this.configService.get<string>('BASE_URL');
+    if (configuredBaseUrl) return configuredBaseUrl.replace(/\/$/, '');
+
+    const port = this.configService.get<string>('PORT') || '3000';
+    return `http://localhost:${port}`;
   }
 }

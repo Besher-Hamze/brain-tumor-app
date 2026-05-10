@@ -28,6 +28,7 @@ export class Report {
   notes?: string;
 
   @Prop({
+    type: String,
     required: true,
     enum: ReportStatus,
     default: ReportStatus.PUBLISHED,

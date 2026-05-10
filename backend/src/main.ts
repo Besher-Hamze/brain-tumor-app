@@ -1,41 +1,42 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { join } from 'path';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // ── CORS ──────────────────────────────────────────
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // ── GLOBAL VALIDATION ─────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,        // strip unknown fields
+      whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,        // auto-transform types
+      transform: true,
     }),
   );
 
-  // ── STATIC FILES ──
-// Images are stored and served by the AI (Flask) module
-// NestJS only saves the URL path returned from Flask
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
-  // ── GLOBAL PREFIX ─────────────────────────────────
   app.setGlobalPrefix('api');
 
-  // ── START ─────────────────────────────────────────
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
-  console.log(`\n🚀 Backend running at: http://localhost:${port}/api`);
-  console.log(`📁 Uploads served at:  http://localhost:${port}/uploads\n`);
+  const publicBaseUrl = (process.env.BASE_URL || `http://localhost:${port}`).replace(
+    /\/$/,
+    '',
+  );
+
+  console.log(`Backend running at: ${publicBaseUrl}/api`);
+  console.log(`Uploads served at: ${publicBaseUrl}/uploads`);
 }
 
 bootstrap();

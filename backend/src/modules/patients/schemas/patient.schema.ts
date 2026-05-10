@@ -9,19 +9,22 @@ export type PatientDocument = Patient & Document;
 @Schema({ timestamps: true })
 export class Patient {
   @Prop({ default: () => uuidv4(), unique: true })
-  medical_record_number: string;
+  medical_record_number!: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
+  user!: Types.ObjectId;
 
   @Prop({ required: true, trim: true })
-  full_name: string;
+  full_name!: string;
 
   @Prop({ required: true })
-  date_of_birth: Date;
+  date_of_birth!: Date;
 
   @Prop({ required: true, enum: Gender })
-  gender: Gender;
+  gender!: Gender;
 
   @Prop({ required: true })
-  phone: string;
+  phone!: string;
 
   @Prop({ trim: true, lowercase: true })
   email?: string;
@@ -33,10 +36,10 @@ export class Patient {
   notes?: string;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  doctor: Types.ObjectId;
+  doctor!: Types.ObjectId;
 
   @Prop({ default: true })
-  is_active: boolean;
+  is_active!: boolean;
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

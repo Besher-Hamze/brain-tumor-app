@@ -1,14 +1,15 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { User, UserDocument } from './schema/user.schema';
+import { Model } from 'mongoose';
+import { UserRole } from 'src/common/enums/role.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User, UserDocument } from './schema/user.schema';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,6 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  // ── CREATE ─────────────────────────────────────────
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     const existingUser = await this.userModel.findOne({
       email: createUserDto.email,
@@ -25,28 +25,23 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const user = await this.userModel.create({
+    return this.userModel.create({
       ...createUserDto,
       password: hashedPassword,
     });
-
-    return user;
   }
 
-  // ── FIND ALL ───────────────────────────────────────
   async findAll(): Promise<UserDocument[]> {
     return this.userModel.find().select('-password').exec();
   }
 
-  // ── FIND ALL DOCTORS ───────────────────────────────
-  async findAllDoctors(): Promise<UserDocument[]> {
+  async findByRole(role: UserRole): Promise<UserDocument[]> {
     return this.userModel
-      .find({ role: 'doctor', is_active: true })
+      .find({ role, is_active: true })
       .select('-password')
       .exec();
   }
 
-  // ── FIND ONE BY ID ─────────────────────────────────
   async findOne(id: string): Promise<UserDocument> {
     try {
       const user = await this.userModel
@@ -56,19 +51,17 @@ export class UsersService {
       if (!user) throw new NotFoundException(`User with ID "${id}" not found`);
       return user;
     } catch (error) {
-      if (error.name === 'CastError') {
+      if (error instanceof Error && error.name === 'CastError') {
         throw new NotFoundException(`Invalid User ID "${id}"`);
       }
       throw error;
     }
   }
 
-  // ── FIND BY EMAIL ──────────────────────────────────
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
 
-  // ── UPDATE ─────────────────────────────────────────
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument> {
     const existingUser = await this.userModel.findById(id).exec();
     if (!existingUser) {
@@ -83,8 +76,13 @@ export class UsersService {
       if (duplicate) throw new ConflictException('Email already exists');
     }
 
+    const update = { ...updateUserDto };
+    if (update.password) {
+      update.password = await bcrypt.hash(update.password, 10);
+    }
+
     const updated = await this.userModel
-      .findByIdAndUpdate(id, { ...updateUserDto }, { new: true })
+      .findByIdAndUpdate(id, update, { new: true })
       .select('-password')
       .exec();
 
@@ -92,7 +90,6 @@ export class UsersService {
     return updated;
   }
 
-  // ── DEACTIVATE ─────────────────────────────────────
   async deactivate(id: string): Promise<UserDocument> {
     const user = await this.userModel
       .findByIdAndUpdate(id, { is_active: false }, { new: true })
@@ -102,7 +99,6 @@ export class UsersService {
     return user;
   }
 
-  // ── ACTIVATE ───────────────────────────────────────
   async activate(id: string): Promise<UserDocument> {
     const user = await this.userModel
       .findByIdAndUpdate(id, { is_active: true }, { new: true })
@@ -112,12 +108,15 @@ export class UsersService {
     return user;
   }
 
-  // ── UPDATE LAST LOGIN ──────────────────────────────
   async updateLastLogin(id: string): Promise<void> {
     await this.userModel.findByIdAndUpdate(id, { last_login: new Date() });
   }
 
-  // ── COMPARE PASSWORD ───────────────────────────────
+  async updatePassword(id: string, password: string): Promise<void> {
+    const hashed = await bcrypt.hash(password, 10);
+    await this.userModel.findByIdAndUpdate(id, { password: hashed }).exec();
+  }
+
   async comparePassword(
     password: string,
     hashedPassword: string,

@@ -1,25 +1,25 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Param,
   Body,
-  Patch,
+  Controller,
   Delete,
+  Get,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
-  Logger,
 } from '@nestjs/common';
-import { ScansService } from './scans.service';
-import { CreateScanDto } from './dto/create-scan.dto';
-import { UpdateScanDto } from './dto/update-scan.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser, Roles } from 'src/common/decorators';
 import { UserRole } from 'src/common/enums/role.enum';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 import { scanMulterOptions } from 'src/config/multer.config';
+import { CreateScanDto } from './dto/create-scan.dto';
+import { UpdateScanDto } from './dto/update-scan.dto';
+import { ScansService } from './scans.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('scans')
@@ -28,8 +28,7 @@ export class ScansController {
 
   constructor(private readonly scansService: ScansService) {}
 
-  // POST /api/scans
-  @Roles(UserRole.DOCTOR, UserRole.ADMIN)
+  @Roles(UserRole.DOCTOR)
   @Post()
   @UseInterceptors(FileInterceptor('file', scanMulterOptions))
   async create(
@@ -37,25 +36,38 @@ export class ScansController {
     @Body() dto: CreateScanDto,
     @CurrentUser() user: any,
   ) {
-    this.logger.log(`POST /scans → by: ${user._id}`);
-    const scan = await this.scansService.create(dto, file, user._id.toString());
-    this.logger.log(`✅ Scan uploaded: ${scan._id}`);
+    this.logger.log(`POST /scans -> by: ${user._id}`);
+    const scan = await this.scansService.create(
+      dto,
+      file,
+      user._id.toString(),
+      user.role,
+    );
     return { success: true, scan };
   }
 
-  // GET /api/scans
-  @Roles(UserRole.DOCTOR, UserRole.ADMIN)
+  @Roles(UserRole.DOCTOR, UserRole.ADMIN, UserRole.PATIENT)
   @Get()
   async findAll(@CurrentUser() user: any) {
-    this.logger.log(`GET /scans → ${user.role} ${user._id}`);
+    this.logger.log(`GET /scans -> ${user.role} ${user._id}`);
     const scans = await this.scansService.findAll(user._id.toString(), user.role);
     return { success: true, count: scans.length, scans };
   }
 
-  // GET /api/scans/patient/:patientId
+  @Roles(UserRole.PATIENT)
+  @Get('my')
+  async findMyScans(@CurrentUser() user: any) {
+    this.logger.log(`GET /scans/my -> ${user._id}`);
+    const scans = await this.scansService.findMyScans(user._id.toString());
+    return { success: true, count: scans.length, scans };
+  }
+
   @Roles(UserRole.DOCTOR, UserRole.ADMIN)
   @Get('patient/:patientId')
-  async findByPatient(@Param('patientId') patientId: string, @CurrentUser() user: any) {
+  async findByPatient(
+    @Param('patientId') patientId: string,
+    @CurrentUser() user: any,
+  ) {
     this.logger.log(`GET /scans/patient/${patientId}`);
     const scans = await this.scansService.findByPatient(
       patientId,
@@ -65,8 +77,7 @@ export class ScansController {
     return { success: true, count: scans.length, scans };
   }
 
-  // GET /api/scans/:id
-  @Roles(UserRole.DOCTOR, UserRole.ADMIN)
+  @Roles(UserRole.DOCTOR, UserRole.ADMIN, UserRole.PATIENT)
   @Get(':id')
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
     this.logger.log(`GET /scans/${id}`);
@@ -74,7 +85,6 @@ export class ScansController {
     return { success: true, scan };
   }
 
-  // PATCH /api/scans/:id
   @Roles(UserRole.DOCTOR, UserRole.ADMIN)
   @Patch(':id')
   async update(
@@ -87,7 +97,6 @@ export class ScansController {
     return { success: true, scan };
   }
 
-  // DELETE /api/scans/:id
   @Roles(UserRole.DOCTOR, UserRole.ADMIN)
   @Delete(':id')
   async delete(@Param('id') id: string, @CurrentUser() user: any) {

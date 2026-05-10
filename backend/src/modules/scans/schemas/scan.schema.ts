@@ -7,34 +7,34 @@ export type ScanDocument = Scan & Document;
 @Schema({ timestamps: true })
 export class Scan {
   @Prop({ type: Types.ObjectId, ref: 'Patient', required: true })
-  patient: Types.ObjectId;
+  patient!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  uploaded_by: Types.ObjectId;
+  uploaded_by!: Types.ObjectId;
 
   @Prop({ required: true, enum: ScanType })
-  type: ScanType;
+  type!: ScanType;
 
   @Prop({ required: true })
-  file_path: string;
+  file_path!: string;
 
   @Prop({ required: true })
-  file_url: string;
+  file_url!: string;
 
   @Prop({ required: true })
-  original_name: string;
+  original_name!: string;
 
   @Prop({ required: true })
-  mime_type: string;
+  mime_type!: string;
 
   @Prop({ required: true })
-  size: number;
+  size!: number;
 
   @Prop()
   notes?: string;
 
   @Prop({ default: false })
-  has_ai_result: boolean;
+  has_ai_result!: boolean;
 
   @Prop()
   ai_result_id?: string;

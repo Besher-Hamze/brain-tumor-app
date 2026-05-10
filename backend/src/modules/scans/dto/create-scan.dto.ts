@@ -9,11 +9,11 @@ import { ScanType } from 'src/common/enums/scan-type.enum';
 export class CreateScanDto {
   @IsNotEmpty()
   @IsString()
-  patient_id: string;
+  patient_id!: string;
 
   @IsNotEmpty()
   @IsEnum(ScanType)
-  type: ScanType;
+  type!: ScanType;
 
   @IsOptional()
   @IsString()

@@ -10,17 +10,29 @@ import { Patient, PatientDocument } from './schemas/patient.schema';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { UserRole } from 'src/common/enums/role.enum';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PatientsService {
   constructor(
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>,
+    private readonly usersService: UsersService,
   ) {}
 
-  // Doctor/Admin creates patient, doctor = current user
+  // Doctor creates patient profile and linked patient account.
   async create(dto: CreatePatientDto, currentUserId: string): Promise<PatientDocument> {
+    const { password, ...patientDto } = dto;
+    const user = await this.usersService.create({
+      full_name: dto.full_name,
+      email: dto.email,
+      password,
+      phone: dto.phone,
+      role: UserRole.PATIENT,
+    });
+
     return this.patientModel.create({
-      ...dto,
+      ...patientDto,
+      user: user._id,
       doctor: currentUserId,
     });
   }
@@ -32,8 +44,29 @@ export class PatientsService {
 
     return this.patientModel
       .find(filter)
+      .populate('user', 'full_name email phone is_active')
       .populate('doctor', 'full_name email specialty')
       .exec();
+  }
+
+  async findByUserId(userId: string): Promise<PatientDocument> {
+    const patient = await this.patientModel
+      .findOne({ user: userId })
+      .populate('user', 'full_name email phone is_active')
+      .populate('doctor', 'full_name email specialty')
+      .exec();
+
+    if (!patient) throw new NotFoundException(`Patient profile for user "${userId}" not found`);
+    return patient;
+  }
+
+  async findIdsByDoctor(doctorId: string): Promise<string[]> {
+    const patients = await this.patientModel
+      .find({ doctor: doctorId })
+      .select('_id')
+      .exec();
+
+    return patients.map((patient) => patient._id.toString());
   }
 
   async findOne(
@@ -43,6 +76,7 @@ export class PatientsService {
   ): Promise<PatientDocument> {
     const patient = await this.patientModel
       .findById(id)
+      .populate('user', 'full_name email phone is_active')
       .populate('doctor', 'full_name email specialty')
       .exec();
 
@@ -68,6 +102,7 @@ export class PatientsService {
 
     const updated = await this.patientModel
       .findByIdAndUpdate(id, dto, { new: true })
+      .populate('user', 'full_name email phone is_active')
       .populate('doctor', 'full_name email specialty')
       .exec();
 

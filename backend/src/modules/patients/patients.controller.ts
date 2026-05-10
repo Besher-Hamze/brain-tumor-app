@@ -26,9 +26,9 @@ export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 
   // 1) Create patient
-  // Scenario: Doctor (or Admin) adds a new patient.
+  // Scenario: Doctor adds a new patient.
   // doctor field = current logged-in user.
-  @Roles(UserRole.DOCTOR, UserRole.ADMIN)
+  @Roles(UserRole.DOCTOR)
   @Post()
   async create(@Body() dto: CreatePatientDto, @CurrentUser() user: any) {
     this.logger.log(`POST /patients → by: ${user._id} (${user.role})`);

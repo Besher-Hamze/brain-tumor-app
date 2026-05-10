@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsEmail,
   IsDateString,
+  MinLength,
 } from 'class-validator';
 import { Gender } from 'src/common/enums/gender.enum';
 import { BloodType } from 'src/common/enums/blood-type.enum';
@@ -12,23 +13,28 @@ import { BloodType } from 'src/common/enums/blood-type.enum';
 export class CreatePatientDto {
   @IsNotEmpty()
   @IsString()
-  full_name: string;
+  full_name!: string;
 
+  @IsEmail()
   @IsNotEmpty()
-  @IsDateString()
-  date_of_birth: string;
-
-  @IsNotEmpty()
-  @IsEnum(Gender)
-  gender: Gender;
+  email!: string;
 
   @IsNotEmpty()
   @IsString()
-  phone: string;
+  @MinLength(6)
+  password!: string;
 
-  @IsOptional()
-  @IsEmail()
-  email?: string;
+  @IsNotEmpty()
+  @IsDateString()
+  date_of_birth!: string;
+
+  @IsNotEmpty()
+  @IsEnum(Gender)
+  gender!: Gender;
+
+  @IsNotEmpty()
+  @IsString()
+  phone!: string;
 
   @IsOptional()
   @IsEnum(BloodType)

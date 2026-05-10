@@ -166,6 +166,19 @@ export class ScansService {
     return deleted;
   }
 
+  async markAiResult(
+    scanId: string,
+    analysisId: string,
+    hasAiResult = true,
+  ): Promise<void> {
+    await this.scanModel
+      .findByIdAndUpdate(scanId, {
+        has_ai_result: hasAiResult,
+        ai_result_id: analysisId,
+      })
+      .exec();
+  }
+
   private async buildAccessFilter(currentUserId: string, currentUserRole: string) {
     if (currentUserRole === UserRole.ADMIN) return {};
 

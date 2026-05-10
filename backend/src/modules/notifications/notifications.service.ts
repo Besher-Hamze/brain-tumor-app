@@ -1,26 +1,132 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { UserRole } from 'src/common/enums/role.enum';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import {
+  Notification,
+  NotificationDocument,
+} from './schemas/notification.schema';
 
 @Injectable()
 export class NotificationsService {
-  create(createNotificationDto: CreateNotificationDto) {
-    return 'This action adds a new notification';
+  constructor(
+    @InjectModel(Notification.name)
+    private notificationModel: Model<NotificationDocument>,
+  ) {}
+
+  async create(dto: CreateNotificationDto): Promise<NotificationDocument> {
+    return this.notificationModel.create({
+      user: new Types.ObjectId(dto.user_id),
+      type: dto.type,
+      message: dto.message,
+      metadata: dto.metadata,
+    });
   }
 
-  findAll() {
-    return `This action returns all notifications`;
+  async createForUser(
+    userId: string,
+    type: CreateNotificationDto['type'],
+    message: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<NotificationDocument> {
+    return this.create({
+      user_id: userId,
+      type,
+      message,
+      metadata,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async findAll(
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<NotificationDocument[]> {
+    const filter =
+      currentUserRole === UserRole.ADMIN ? {} : { user: currentUserId };
+
+    return this.notificationModel
+      .find(filter)
+      .populate('user', 'full_name email role')
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
+  async findOne(
+    id: string,
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<NotificationDocument> {
+    const notification = await this.notificationModel
+      .findById(id)
+      .populate('user', 'full_name email role')
+      .exec();
+
+    if (!notification) throw new NotFoundException(`Notification "${id}" not found`);
+
+    if (
+      currentUserRole !== UserRole.ADMIN &&
+      notification.user.toString() !== currentUserId
+    ) {
+      throw new ForbiddenException('Access denied to this notification');
+    }
+
+    return notification;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async update(
+    id: string,
+    dto: UpdateNotificationDto,
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<NotificationDocument> {
+    await this.findOne(id, currentUserId, currentUserRole);
+
+    const updated = await this.notificationModel
+      .findByIdAndUpdate(id, dto, { new: true })
+      .populate('user', 'full_name email role')
+      .exec();
+
+    if (!updated) throw new NotFoundException(`Notification "${id}" not found`);
+    return updated;
+  }
+
+  async markAsRead(
+    id: string,
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<NotificationDocument> {
+    return this.update(id, { is_read: true }, currentUserId, currentUserRole);
+  }
+
+  async markAllAsRead(
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<{ modified_count: number }> {
+    const filter =
+      currentUserRole === UserRole.ADMIN ? {} : { user: currentUserId };
+
+    const result = await this.notificationModel
+      .updateMany(filter, { is_read: true })
+      .exec();
+
+    return { modified_count: result.modifiedCount };
+  }
+
+  async delete(
+    id: string,
+    currentUserId: string,
+    currentUserRole: string,
+  ): Promise<NotificationDocument> {
+    await this.findOne(id, currentUserId, currentUserRole);
+
+    const deleted = await this.notificationModel.findByIdAndDelete(id).exec();
+    if (!deleted) throw new NotFoundException(`Notification "${id}" not found`);
+    return deleted;
   }
 }

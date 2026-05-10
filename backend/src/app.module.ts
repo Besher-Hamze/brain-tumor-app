@@ -5,6 +5,9 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PatientsModule } from './modules/patients/patients.module';
 import { ScansModule } from './modules/scans/scans.module';
+import { AnalysisModule } from './modules/analysis/analysis.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { ScansModule } from './modules/scans/scans.module';
     AuthModule,
     PatientsModule,
     ScansModule,
+    AnalysisModule,
+    NotificationsModule,
+    ReportsModule,
     /*ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'uploads'),
     serveRoot: '/uploads/',

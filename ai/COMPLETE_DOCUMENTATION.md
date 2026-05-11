@@ -677,4 +677,3 @@ Brain Tumor Detection System using Deep Learning
 
 **Version:** 3.0  
 **Last Updated:** March 12, 2026  
-**Authors:** Jumana Al-Daeef & Daissyl Sariyan

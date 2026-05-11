@@ -44,9 +44,15 @@ app.json = CustomJSONProvider(app)
 
 
 # --- CONFIGURATION ---
-SEGMENTATION_MODEL = 'best_model_256_gpu.h5'
-CLASSIFICATION_MODEL = 'tumor_classifier_v3.h5'
-HISTORY_FILE = 'analysis_history.json'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, 'models')
+SEGMENTATION_MODEL_CANDIDATES = [
+    os.path.join(MODEL_DIR, 'best_model_256_gpu.h5'),
+    os.path.join(MODEL_DIR, 'best_unet_model.h5'),
+]
+CLASSIFICATION_MODEL = os.path.join(MODEL_DIR, 'tumor_classifier_v3.h5')
+CT_DETECTION_MODEL = os.path.join(MODEL_DIR, 'ct_detector_best.h5')
+HISTORY_FILE = os.path.join(BASE_DIR, 'analysis_history.json')
 
 IMG_SIZE_SEG = 256
 IMG_SIZE_CLAS = 224
@@ -61,8 +67,11 @@ print("="*70)
 print("\n📦 Loading AI models...")
 
 try:
+    segmentation_model_path = next(
+        model_path for model_path in SEGMENTATION_MODEL_CANDIDATES if os.path.exists(model_path)
+    )
     segmentation_model = tf.keras.models.load_model(
-        SEGMENTATION_MODEL,
+        segmentation_model_path,
         custom_objects={
             'dice_coefficient': lambda y_true, y_pred: tf.constant(0.0),
             'combined_loss': lambda y_true, y_pred: tf.constant(0.0)
@@ -84,22 +93,10 @@ except Exception as e:
     print(f"   ❌ Classification model failed: {e}")
     classification_model = None
 
-try:
-    segmentation_model = tf.keras.models.load_model(...)
-    print("   ✅ Segmentation model loaded")
-except:
-    ...
-
-try:
-    classification_model = tf.keras.models.load_model(...)
-    print("   ✅ Classification model loaded")
-except:
-    ...
-
 # ADD HERE ↓
 try:
     ct_detection_model = tf.keras.models.load_model(
-        'models/ct_detector_best.h5',
+        CT_DETECTION_MODEL,
         compile=False
     )
     print("   ✅ CT detection model loaded (95.3% accuracy)")

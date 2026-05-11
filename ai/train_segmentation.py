@@ -40,7 +40,7 @@ else:
     except RuntimeError as e:
         print(f"⚠️  GPU config error: {e}\n")
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION ----
 IMG_SIZE = 256
 BATCH_SIZE = 8
 EPOCHS = 30

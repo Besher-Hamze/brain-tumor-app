@@ -53,7 +53,7 @@ export class AppointmentsService {
     });
 
     await this.notifyPatient(
-      patient.user.toString(),
+      this.extractObjectId(patient.user),
       'A new appointment has been scheduled.',
       appointment._id.toString(),
     );
@@ -154,7 +154,7 @@ export class AppointmentsService {
         ? 'Your appointment has been cancelled.'
         : 'Your appointment has been updated.';
 
-    await this.notifyPatient(patient.user.toString(), message, id);
+    await this.notifyPatient(this.extractObjectId(patient.user), message, id);
 
     return this.populateAppointment(id);
   }

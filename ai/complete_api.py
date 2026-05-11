@@ -108,9 +108,12 @@ except Exception as e:
     ct_detection_model = None
 
 
-if segmentation_model is None:
+if segmentation_model is None and ct_detection_model is None:
     print("\n❌ Critical: Segmentation model required!")
     exit(1)
+
+if segmentation_model is None:
+    print("\nMRI segmentation model not loaded; API will run in CT-only mode.")
 
 # --- PREPROCESSING ---
 def apply_clahe(img):
@@ -415,6 +418,9 @@ def analyze():
             severity_info = get_severity_info(tumor_percentage, None, 0.0)
 
         else:
+            if segmentation_model is None:
+                return jsonify({'success': False, 'error': 'MRI segmentation model not loaded'}), 500
+
             mask = segment_tumor(image)
             total_pixels = mask.size
             tumor_pixels = int(np.sum(mask > 127))
@@ -513,6 +519,9 @@ def analyze_base64():
             severity_info = get_severity_info(tumor_percentage, None, 0.0)
 
         else:
+            if segmentation_model is None:
+                return jsonify({'success': False, 'error': 'MRI segmentation model not loaded'}), 500
+
             mask = segment_tumor(image)
             total_pixels = mask.size
             tumor_pixels = int(np.sum(mask > 127))
@@ -687,4 +696,5 @@ if __name__ == '__main__':
     print(f"   Classification: {'✅' if classification_model else '❌'}")
     print(f"\n{'='*70}\n")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=5000, use_reloader=debug)

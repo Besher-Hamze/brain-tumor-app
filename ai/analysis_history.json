@@ -1,0 +1,218 @@
+[
+  {
+    "success": true,
+    "timestamp": "2026-05-11T10:30:04.284753",
+    "scan_info": {
+      "scan_type": "CT",
+      "note": "CT used for detection only. Upload MRI for full analysis."
+    },
+    "detection": {
+      "has_tumor": false,
+      "tumor_percentage": 0.0,
+      "tumor_pixels": 0,
+      "confidence": 78.2
+    },
+    "classification": {
+      "enabled": false,
+      "tumor_type": null,
+      "confidence": 0.0,
+      "note": "Classification not available for CT scans"
+    },
+    "severity": {
+      "severity": "none",
+      "action": "ROUTINE",
+      "message": "No tumor detected. Continue routine monitoring.",
+      "next_steps": [
+        "Schedule regular check-ups",
+        "Maintain healthy lifestyle",
+        "Report any new symptoms"
+      ]
+    },
+    "clinical_analysis": {
+      "size": {
+        "estimated_diameter_cm": 0.0,
+        "exceeds_2cm_threshold": false,
+        "area_cm2": 0.0,
+        "tumor_pixels": 0,
+        "pixel_spacing_mm": 0.75
+      },
+      "border": {
+        "irregularity_score": 0.0,
+        "is_irregular": false,
+        "clinical_note": "CT scan \u2014 segmentation not available"
+      },
+      "heterogeneity": {
+        "heterogeneity_score": 0.0,
+        "is_heterogeneous": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      },
+      "tissue_contrast": {
+        "contrast_score": 0.0,
+        "is_suspicious": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      }
+    }
+  },
+  {
+    "success": true,
+    "timestamp": "2026-05-11T10:32:18.095310",
+    "scan_info": {
+      "scan_type": "CT",
+      "note": "CT used for detection only. Upload MRI for full analysis."
+    },
+    "detection": {
+      "has_tumor": false,
+      "tumor_percentage": 0.0,
+      "tumor_pixels": 0,
+      "confidence": 78.2
+    },
+    "classification": {
+      "enabled": false,
+      "tumor_type": null,
+      "confidence": 0.0,
+      "note": "Classification not available for CT scans"
+    },
+    "severity": {
+      "severity": "none",
+      "action": "ROUTINE",
+      "message": "No tumor detected. Continue routine monitoring.",
+      "next_steps": [
+        "Schedule regular check-ups",
+        "Maintain healthy lifestyle",
+        "Report any new symptoms"
+      ]
+    },
+    "clinical_analysis": {
+      "size": {
+        "estimated_diameter_cm": 0.0,
+        "exceeds_2cm_threshold": false,
+        "area_cm2": 0.0,
+        "tumor_pixels": 0,
+        "pixel_spacing_mm": 0.75
+      },
+      "border": {
+        "irregularity_score": 0.0,
+        "is_irregular": false,
+        "clinical_note": "CT scan \u2014 segmentation not available"
+      },
+      "heterogeneity": {
+        "heterogeneity_score": 0.0,
+        "is_heterogeneous": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      },
+      "tissue_contrast": {
+        "contrast_score": 0.0,
+        "is_suspicious": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      }
+    }
+  },
+  {
+    "success": true,
+    "timestamp": "2026-05-11T10:34:51.018050",
+    "scan_info": {
+      "scan_type": "CT",
+      "note": "CT used for detection only. Upload MRI for full analysis."
+    },
+    "detection": {
+      "has_tumor": false,
+      "tumor_percentage": 0.0,
+      "tumor_pixels": 0,
+      "confidence": 78.2
+    },
+    "classification": {
+      "enabled": false,
+      "tumor_type": null,
+      "confidence": 0.0,
+      "note": "Classification not available for CT scans"
+    },
+    "severity": {
+      "severity": "none",
+      "action": "ROUTINE",
+      "message": "No tumor detected. Continue routine monitoring.",
+      "next_steps": [
+        "Schedule regular check-ups",
+        "Maintain healthy lifestyle",
+        "Report any new symptoms"
+      ]
+    },
+    "clinical_analysis": {
+      "size": {
+        "estimated_diameter_cm": 0.0,
+        "exceeds_2cm_threshold": false,
+        "area_cm2": 0.0,
+        "tumor_pixels": 0,
+        "pixel_spacing_mm": 0.75
+      },
+      "border": {
+        "irregularity_score": 0.0,
+        "is_irregular": false,
+        "clinical_note": "CT scan \u2014 segmentation not available"
+      },
+      "heterogeneity": {
+        "heterogeneity_score": 0.0,
+        "is_heterogeneous": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      },
+      "tissue_contrast": {
+        "contrast_score": 0.0,
+        "is_suspicious": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      }
+    }
+  },
+  {
+    "success": true,
+    "timestamp": "2026-05-11T10:37:08.223972",
+    "scan_info": {
+      "scan_type": "CT",
+      "note": "CT used for detection only. Upload MRI for full analysis."
+    },
+    "detection": {
+      "has_tumor": false,
+      "tumor_percentage": 0.0,
+      "tumor_pixels": 0,
+      "confidence": 78.2
+    },
+    "classification": {
+      "enabled": false,
+      "tumor_type": null,
+      "confidence": 0.0,
+      "note": "Classification not available for CT scans"
+    },
+    "severity": {
+      "severity": "none",
+      "action": "ROUTINE",
+      "message": "No tumor detected. Continue routine monitoring.",
+      "next_steps": [
+        "Schedule regular check-ups",
+        "Maintain healthy lifestyle",
+        "Report any new symptoms"
+      ]
+    },
+    "clinical_analysis": {
+      "size": {
+        "estimated_diameter_cm": 0.0,
+        "exceeds_2cm_threshold": false,
+        "area_cm2": 0.0,
+        "tumor_pixels": 0,
+        "pixel_spacing_mm": 0.75
+      },
+      "border": {
+        "irregularity_score": 0.0,
+        "is_irregular": false,
+        "clinical_note": "CT scan \u2014 segmentation not available"
+      },
+      "heterogeneity": {
+        "heterogeneity_score": 0.0,
+        "is_heterogeneous": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      },
+      "tissue_contrast": {
+        "contrast_score": 0.0,
+        "is_suspicious": false,
+        "clinical_note": "CT scan \u2014 use MRI for detailed analysis"
+      }
+    }
+  }
+]

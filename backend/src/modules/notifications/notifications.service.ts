@@ -48,7 +48,9 @@ export class NotificationsService {
     currentUserRole: string,
   ): Promise<NotificationDocument[]> {
     const filter =
-      currentUserRole === UserRole.ADMIN ? {} : { user: currentUserId };
+      currentUserRole === UserRole.ADMIN
+        ? {}
+        : { user: new Types.ObjectId(currentUserId) };
 
     return this.notificationModel
       .find(filter)
@@ -71,7 +73,7 @@ export class NotificationsService {
 
     if (
       currentUserRole !== UserRole.ADMIN &&
-      notification.user.toString() !== currentUserId
+      this.extractObjectId(notification.user) !== currentUserId
     ) {
       throw new ForbiddenException('Access denied to this notification');
     }
@@ -109,7 +111,9 @@ export class NotificationsService {
     currentUserRole: string,
   ): Promise<{ modified_count: number }> {
     const filter =
-      currentUserRole === UserRole.ADMIN ? {} : { user: currentUserId };
+      currentUserRole === UserRole.ADMIN
+        ? {}
+        : { user: new Types.ObjectId(currentUserId) };
 
     const result = await this.notificationModel
       .updateMany(filter, { is_read: true })
@@ -128,5 +132,14 @@ export class NotificationsService {
     const deleted = await this.notificationModel.findByIdAndDelete(id).exec();
     if (!deleted) throw new NotFoundException(`Notification "${id}" not found`);
     return deleted;
+  }
+
+  private extractObjectId(value: unknown): string {
+    if (value instanceof Types.ObjectId) return value.toString();
+    if (typeof value === 'string') return value;
+    if (value && typeof value === 'object' && '_id' in value) {
+      return String((value as { _id: unknown })._id);
+    }
+    return String(value);
   }
 }

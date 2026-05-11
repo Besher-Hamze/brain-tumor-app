@@ -56,7 +56,7 @@ export class ReportsService {
       throw new ForbiddenException('Scan does not belong to this patient');
     }
 
-    if (analysis.scan.toString() !== dto.scan_id) {
+    if (this.extractObjectId(analysis.scan) !== dto.scan_id) {
       throw new ForbiddenException('Analysis does not belong to this scan');
     }
 
@@ -78,7 +78,10 @@ export class ReportsService {
     });
 
     if (report.status === ReportStatus.PUBLISHED) {
-      await this.notifyPatientReportReady(report._id.toString(), patient.user.toString());
+      await this.notifyPatientReportReady(
+        report._id.toString(),
+        this.extractObjectId(patient.user),
+      );
     }
 
     return this.populateReport(report._id.toString());
@@ -176,11 +179,14 @@ export class ReportsService {
 
     if (!wasPublished && updated.status === ReportStatus.PUBLISHED) {
       const patient = await this.patientsService.findOne(
-        updated.patient.toString(),
+        this.extractObjectId(updated.patient),
         currentUserId,
         currentUserRole,
       );
-      await this.notifyPatientReportReady(updated._id.toString(), patient.user.toString());
+      await this.notifyPatientReportReady(
+        updated._id.toString(),
+        this.extractObjectId(patient.user),
+      );
     }
 
     return this.populateReport(id);
